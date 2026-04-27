@@ -5,6 +5,45 @@ import (
 	"golang-api/internal/repository"
 )
 
+func GetAllUsers() (
+	[]domain.User,
+	error,
+) {
+
+	return repository.
+		GetAllUsers()
+}
+
+func UpdateUser(
+	id uint,
+	name string,
+	email string,
+	actorID uint,
+) (domain.User, error) {
+
+	user, err :=
+		repository.UpdateUser(
+			id,
+			name,
+			email,
+		)
+
+	if err != nil {
+		return user, err
+	}
+
+	// audit log
+	SaveActivity(
+		actorID,
+		"UPDATE_USER",
+		"/api/users",
+		"PUT",
+		"",
+		"Updated user",
+	)
+
+	return user, nil
+}
 func SaveActivity(
 	userID uint,
 	action string,

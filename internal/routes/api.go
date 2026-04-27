@@ -21,10 +21,10 @@ func Setup(app *fiber.App) {
 		"/register",
 		handler.Register,
 	)
-	api.Delete(
-		"/:id",
-		handler.DeleteUser,
-	)
+	// api.Delete(
+	// 	"/:id",
+	// 	handler.DeleteUser,
+	// )
 
 	api.Post(
 		"/login",
@@ -34,6 +34,21 @@ func Setup(app *fiber.App) {
 	user := api.Group(
 		"/users",
 		middleware.JWTProtected(),
+	)
+
+	user.Get(
+		"/",
+		handler.GetUsers,
+	)
+
+	user.Put(
+		"/:id",
+		handler.UpdateUser,
+	)
+
+	user.Delete(
+		"/:id",
+		handler.DeleteUser,
 	)
 
 	user.Get(

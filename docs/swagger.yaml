@@ -16,6 +16,13 @@ definitions:
       password:
         type: string
     type: object
+  golang-api_internal_dto.UpdateUserDTO:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+    type: object
 host: localhost:3000
 info:
   contact: {}
@@ -78,6 +85,27 @@ paths:
       summary: Register user
       tags:
       - Auth
+  /users:
+    get:
+      description: Ambil semua user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get all users
+      tags:
+      - Users
   /users/{id}:
     delete:
       parameters:
@@ -92,6 +120,45 @@ paths:
       security:
       - BearerAuth: []
       summary: Delete user
+      tags:
+      - Users
+    put:
+      consumes:
+      - application/json
+      description: Update data user
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update Payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/golang-api_internal_dto.UpdateUserDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update user
       tags:
       - Users
 securityDefinitions:

@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v4"
 )
 
 // Register godoc
@@ -165,8 +166,20 @@ func UpdateUser(
 				})
 	}
 
-	actorID := uint(1)
-	// nanti ambil dari JWT
+	user :=
+		c.Locals(
+			"user",
+		).(*jwt.Token)
+
+	claims :=
+		user.Claims.(jwt.MapClaims)
+
+	actorID :=
+		uint(
+			claims["user_id"].(float64),
+		)
+
+		// nanti ambil dari JWT
 
 	updated, err :=
 		service.UpdateUser(
@@ -215,7 +228,18 @@ func DeleteUser(
 
 	targetID := uint(id64)
 
-	actorID := uint(1)
+	user :=
+		c.Locals(
+			"user",
+		).(*jwt.Token)
+
+	claims :=
+		user.Claims.(jwt.MapClaims)
+
+	actorID :=
+		uint(
+			claims["user_id"].(float64),
+		)
 	// nanti ambil dari JWT
 
 	err :=

@@ -48,6 +48,7 @@ func Setup(app *fiber.App) {
 
 	user.Delete(
 		"/:id",
+		middleware.AdminOnly(),
 		handler.DeleteUser,
 	)
 

@@ -3,16 +3,19 @@ package config
 import (
 	"time"
 
+	"golang-api/internal/domain"
+
 	"github.com/golang-jwt/jwt/v5"
 )
 
 func GenerateToken(
-	userID uint,
+	user domain.User,
 ) (string, error) {
 
 	claims := jwt.MapClaims{
-		"user_id": userID,
-
+		"user_id": user.ID,
+		"email":   user.Email,
+		"role":    user.Role,
 		"exp": time.Now().
 			Add(
 				24 * time.Hour,

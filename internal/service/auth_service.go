@@ -23,6 +23,7 @@ func Register(
 		Name:     req.Name,
 		Email:    req.Email,
 		Password: hash,
+		Role:     req.Role,
 	}
 
 	createdUser, err :=
@@ -129,9 +130,9 @@ func Login(
 		"User Login",
 	)
 
-	token, _ :=
+	token, err :=
 		config.GenerateToken(
-			user.ID,
+			user,
 		)
 
 	return token, nil

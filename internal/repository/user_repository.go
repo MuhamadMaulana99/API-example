@@ -35,6 +35,7 @@ func GetAllUsers() (
 func GetUsersPaginated(
 	page int,
 	limit int,
+	search string,
 ) (
 	[]domain.User,
 	int64,
@@ -47,22 +48,35 @@ func GetUsersPaginated(
 	offset :=
 		(page - 1) * limit
 
-	config.DB.
-		Model(
-			&domain.User{},
-		).
-		Count(
-			&total,
-		)
-
-	err :=
+	query :=
 		config.DB.
-			Limit(
-				limit,
-			).
-			Offset(
-				offset,
-			).
+			Model(
+				&domain.User{},
+			)
+
+	// =================
+	// SEARCH FILTER
+	// =================
+	if search != "" {
+
+		query =
+			query.Where(
+				"name ILIKE ?",
+				"%"+search+"%",
+			)
+
+	}
+
+	// hitung total setelah filter
+	query.Count(
+		&total,
+	)
+
+	// ambil data
+	err :=
+		query.
+			Limit(limit).
+			Offset(offset).
 			Find(
 				&users,
 			).Error

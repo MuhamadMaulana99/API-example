@@ -3,6 +3,7 @@ package handler
 import (
 	"golang-api/internal/dto"
 	"golang-api/internal/service"
+	"math"
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
@@ -63,6 +64,7 @@ func Register(
 // @Produce json
 // @Param page query int false "Page number" default(1)
 // @Param limit query int false "Items per page" default(10)
+// @Param search query string false "Search by name"
 // @Success 200 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Router /users [get]
@@ -79,11 +81,17 @@ func GetUsers(c *fiber.Ctx) error {
 	if limit > 100 {
 		limit = 100
 	}
+	search :=
+		c.Query(
+			"search",
+			"",
+		)
 
 	users, total, err :=
 		service.GetUsersPaginated(
 			page,
 			limit,
+			search,
 		)
 
 	if err != nil {
@@ -94,14 +102,23 @@ func GetUsers(c *fiber.Ctx) error {
 		)
 	}
 
+	totalPages :=
+		int(
+			math.Ceil(
+				float64(total) /
+					float64(limit),
+			),
+		)
+
 	return c.JSON(
 		fiber.Map{
 			"success": true,
 			"data":    users,
 			"meta": fiber.Map{
-				"page":  page,
-				"limit": limit,
-				"total": total,
+				"page":        page,
+				"limit":       limit,
+				"total":       total,
+				"total_pages": totalPages,
 			},
 		},
 	)

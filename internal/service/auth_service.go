@@ -52,6 +52,7 @@ func Register(
 func GetUsersPaginated(
 	page int,
 	limit int,
+	search string,
 ) (
 	[]domain.User,
 	int64,
@@ -62,6 +63,7 @@ func GetUsersPaginated(
 		GetUsersPaginated(
 			page,
 			limit,
+			search,
 		)
 }
 

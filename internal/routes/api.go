@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"golang-api/internal/dto"
 	"golang-api/internal/handler"
 	"golang-api/internal/middleware"
 
@@ -12,22 +13,17 @@ func Setup(app *fiber.App) {
 
 	api := app.Group("/api")
 
-	app.Get(
-		"/swagger/*",
-		swagger.HandlerDefault,
-	)
+	app.Get("/swagger/*", swagger.HandlerDefault)
 
 	api.Post(
 		"/register",
+		middleware.ValidateBody[dto.RegisterDTO](),
 		handler.Register,
 	)
-	// api.Delete(
-	// 	"/:id",
-	// 	handler.DeleteUser,
-	// )
 
 	api.Post(
 		"/login",
+		middleware.ValidateBody[dto.LoginDTO](),
 		handler.Login,
 	)
 
@@ -43,6 +39,7 @@ func Setup(app *fiber.App) {
 
 	user.Put(
 		"/:id",
+		middleware.ValidateBody[dto.UpdateUserDTO](),
 		handler.UpdateUser,
 	)
 

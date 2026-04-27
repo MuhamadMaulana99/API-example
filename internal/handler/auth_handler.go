@@ -3,11 +3,10 @@ package handler
 import (
 	"golang-api/internal/dto"
 	"golang-api/internal/service"
-	"math"
+	"golang-api/pkg/utils"
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/golang-jwt/jwt/v4"
 )
 
 // Register godoc
@@ -20,41 +19,17 @@ import (
 // @Success 201 {object} map[string]interface{}
 // @Failure 400 {object} map[string]interface{}
 // @Router /register [post]
-func Register(
-	c *fiber.Ctx,
-) error {
+func Register(c *fiber.Ctx) error {
 
-	var req dto.RegisterDTO
+	req := c.Locals("body").(*dto.RegisterDTO)
 
-	if err := c.BodyParser(
-		&req,
-	); err != nil {
-
-		return c.Status(400).
-			JSON(fiber.Map{
-				"message": "invalid body",
-			})
-	}
-
-	user, err :=
-		service.Register(
-			req,
-		)
+	user, err := service.Register(*req)
 
 	if err != nil {
-		return c.Status(500).
-			JSON(
-				fiber.Map{
-					"message": err.Error(),
-				})
+		return utils.Error(c, 500, "failed create user", err.Error())
 	}
 
-	return c.Status(201).
-		JSON(
-			fiber.Map{
-				"message": "created",
-				"data":    user,
-			})
+	return utils.Success(c, 201, "created", user)
 }
 
 // GetUsers godoc
@@ -71,58 +46,29 @@ func Register(
 // @Router /users [get]
 func GetUsers(c *fiber.Ctx) error {
 
-	page, _ := strconv.Atoi(
-		c.Query("page", "1"),
-	)
-
-	limit, _ := strconv.Atoi(
-		c.Query("limit", "10"),
-	)
+	page, _ := strconv.Atoi(c.Query("page", "1"))
+	limit, _ := strconv.Atoi(c.Query("limit", "10"))
+	search := c.Query("search", "")
 
 	if limit > 100 {
 		limit = 100
 	}
-	search :=
-		c.Query(
-			"search",
-			"",
-		)
 
 	users, total, err :=
-		service.GetUsersPaginated(
-			page,
-			limit,
-			search,
-		)
+		service.GetUsersPaginated(page, limit, search)
 
 	if err != nil {
-		return c.Status(500).JSON(
-			fiber.Map{
-				"message": "failed",
-			},
-		)
+		return utils.Error(c, 500, "failed get users", err.Error())
 	}
 
-	totalPages :=
-		int(
-			math.Ceil(
-				float64(total) /
-					float64(limit),
-			),
-		)
-
-	return c.JSON(
-		fiber.Map{
-			"success": true,
-			"data":    users,
-			"meta": fiber.Map{
-				"page":        page,
-				"limit":       limit,
-				"total":       total,
-				"total_pages": totalPages,
-			},
+	return utils.Success(c, 200, "success", fiber.Map{
+		"data": users,
+		"meta": fiber.Map{
+			"page":  page,
+			"limit": limit,
+			"total": total,
 		},
-	)
+	})
 }
 
 // UpdateUser godoc
@@ -138,71 +84,21 @@ func GetUsers(c *fiber.Ctx) error {
 // @Failure 400 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Router /users/{id} [put]
-func UpdateUser(
-	c *fiber.Ctx,
-) error {
+func UpdateUser(c *fiber.Ctx) error {
 
-	idParam :=
-		c.Params("id")
+	req := c.Locals("body").(dto.UpdateUserDTO)
 
-	id64, _ :=
-		strconv.ParseUint(
-			idParam,
-			10,
-			64,
-		)
+	id, _ := strconv.Atoi(c.Params("id"))
 
-	var req dto.UpdateUserDTO
+	actorID := utils.GetUserIDFromToken(c)
 
-	if err :=
-		c.BodyParser(
-			&req,
-		); err != nil {
-
-		return c.Status(400).
-			JSON(
-				fiber.Map{
-					"message": "invalid body",
-				})
-	}
-
-	user :=
-		c.Locals(
-			"user",
-		).(*jwt.Token)
-
-	claims :=
-		user.Claims.(jwt.MapClaims)
-
-	actorID :=
-		uint(
-			claims["user_id"].(float64),
-		)
-
-		// nanti ambil dari JWT
-
-	updated, err :=
-		service.UpdateUser(
-			uint(id64),
-			req.Name,
-			req.Email,
-			actorID,
-		)
+	data, err := service.UpdateUser(uint(id), req.Name, req.Email, actorID)
 
 	if err != nil {
-
-		return c.Status(500).
-			JSON(
-				fiber.Map{
-					"message": "update failed",
-				})
+		return utils.Error(c, 500, "update failed", err.Error())
 	}
 
-	return c.JSON(
-		fiber.Map{
-			"message": "updated",
-			"data":    updated,
-		})
+	return utils.Success(c, 200, "updated", data)
 }
 
 // DeleteUser godoc
@@ -212,54 +108,19 @@ func UpdateUser(
 // @Param id path int true "User ID"
 // @Success 200
 // @Router /users/{id} [delete]
-func DeleteUser(
-	c *fiber.Ctx,
-) error {
+func DeleteUser(c *fiber.Ctx) error {
 
-	idParam :=
-		c.Params("id")
+	id, _ := strconv.Atoi(c.Params("id"))
 
-	id64, _ :=
-		strconv.ParseUint(
-			idParam,
-			10,
-			64,
-		)
+	actorID := utils.GetUserIDFromToken(c)
 
-	targetID := uint(id64)
-
-	user :=
-		c.Locals(
-			"user",
-		).(*jwt.Token)
-
-	claims :=
-		user.Claims.(jwt.MapClaims)
-
-	actorID :=
-		uint(
-			claims["user_id"].(float64),
-		)
-	// nanti ambil dari JWT
-
-	err :=
-		service.DeleteUser(
-			targetID,
-			actorID,
-		)
+	err := service.DeleteUser(uint(id), actorID)
 
 	if err != nil {
-		return c.Status(500).
-			JSON(
-				fiber.Map{
-					"message": "delete failed",
-				})
+		return utils.Error(c, 500, "delete failed", err.Error())
 	}
 
-	return c.JSON(
-		fiber.Map{
-			"message": "deleted",
-		})
+	return utils.Success(c, 200, "deleted", nil)
 }
 
 // Login godoc
@@ -271,30 +132,19 @@ func DeleteUser(
 // @Success 200 {object} map[string]interface{}
 // @Failure 401 {object} map[string]interface{}
 // @Router /login [post]
-func Login(
-	c *fiber.Ctx,
-) error {
+func Login(c *fiber.Ctx) error {
 
-	var req dto.LoginDTO
+	req := c.Locals("body").(dto.LoginDTO)
 
-	c.BodyParser(&req)
-
-	token, err :=
-		service.Login(req)
+	token, err := service.Login(req)
 
 	if err != nil {
-
-		return c.Status(401).
-			JSON(
-				fiber.Map{
-					"message": "unauthorized",
-				})
+		return utils.Error(c, 401, "unauthorized", err.Error())
 	}
 
-	return c.JSON(
-		fiber.Map{
-			"token": token,
-		})
+	return utils.Success(c, 200, "login success", fiber.Map{
+		"token": token,
+	})
 }
 
 func Profile(

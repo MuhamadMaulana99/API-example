@@ -87,7 +87,18 @@ paths:
       - Auth
   /users:
     get:
-      description: Ambil semua user
+      description: Ambil daftar user dengan pagination
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Items per page
+        in: query
+        name: limit
+        type: integer
       produces:
       - application/json
       responses:
@@ -103,7 +114,7 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Get all users
+      summary: Get users with pagination
       tags:
       - Users
   /users/{id}:

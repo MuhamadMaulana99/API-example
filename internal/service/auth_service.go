@@ -49,6 +49,22 @@ func Register(
 	return createdUser, nil
 }
 
+func GetUsersPaginated(
+	page int,
+	limit int,
+) (
+	[]domain.User,
+	int64,
+	error,
+) {
+
+	return repository.
+		GetUsersPaginated(
+			page,
+			limit,
+		)
+}
+
 func DeleteUser(
 	targetID uint,
 	actorID uint,

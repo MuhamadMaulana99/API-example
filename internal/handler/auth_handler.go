@@ -56,35 +56,55 @@ func Register(
 }
 
 // GetUsers godoc
-// @Summary Get all users
-// @Description Ambil semua user
+// @Summary Get users with pagination
+// @Description Ambil daftar user dengan pagination
 // @Tags Users
 // @Security BearerAuth
 // @Produce json
+// @Param page query int false "Page number" default(1)
+// @Param limit query int false "Items per page" default(10)
 // @Success 200 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Router /users [get]
-func GetUsers(
-	c *fiber.Ctx,
-) error {
+func GetUsers(c *fiber.Ctx) error {
 
-	users, err :=
-		service.GetAllUsers()
+	page, _ := strconv.Atoi(
+		c.Query("page", "1"),
+	)
+
+	limit, _ := strconv.Atoi(
+		c.Query("limit", "10"),
+	)
+
+	if limit > 100 {
+		limit = 100
+	}
+
+	users, total, err :=
+		service.GetUsersPaginated(
+			page,
+			limit,
+		)
 
 	if err != nil {
-
-		return c.Status(500).
-			JSON(
-				fiber.Map{
-					"message": "failed get users",
-				})
+		return c.Status(500).JSON(
+			fiber.Map{
+				"message": "failed",
+			},
+		)
 	}
 
 	return c.JSON(
 		fiber.Map{
 			"success": true,
 			"data":    users,
-		})
+			"meta": fiber.Map{
+				"page":  page,
+				"limit": limit,
+				"total": total,
+			},
+		},
+	)
 }
 
 // UpdateUser godoc

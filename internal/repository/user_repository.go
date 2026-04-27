@@ -32,6 +32,43 @@ func GetAllUsers() (
 
 	return users, err
 }
+func GetUsersPaginated(
+	page int,
+	limit int,
+) (
+	[]domain.User,
+	int64,
+	error,
+) {
+
+	var users []domain.User
+	var total int64
+
+	offset :=
+		(page - 1) * limit
+
+	config.DB.
+		Model(
+			&domain.User{},
+		).
+		Count(
+			&total,
+		)
+
+	err :=
+		config.DB.
+			Limit(
+				limit,
+			).
+			Offset(
+				offset,
+			).
+			Find(
+				&users,
+			).Error
+
+	return users, total, err
+}
 
 func UpdateUser(
 	id uint,

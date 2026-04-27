@@ -5,11 +5,17 @@ import (
 	"golang-api/internal/middleware"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/swagger"
 )
 
 func Setup(app *fiber.App) {
 
 	api := app.Group("/api")
+
+	app.Get(
+		"/swagger/*",
+		swagger.HandlerDefault,
+	)
 
 	api.Post(
 		"/register",

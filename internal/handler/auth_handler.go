@@ -8,6 +8,16 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+// Register godoc
+// @Summary Register user
+// @Description create user baru
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param request body dto.RegisterDTO true "register"
+// @Success 201 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Router /register [post]
 func Register(
 	c *fiber.Ctx,
 ) error {
@@ -44,6 +54,14 @@ func Register(
 				"data":    user,
 			})
 }
+
+// DeleteUser godoc
+// @Summary Delete user
+// @Security BearerAuth
+// @Tags Users
+// @Param id path int true "User ID"
+// @Success 200
+// @Router /users/{id} [delete]
 func DeleteUser(
 	c *fiber.Ctx,
 ) error {
@@ -83,6 +101,15 @@ func DeleteUser(
 		})
 }
 
+// Login godoc
+// @Summary Login user
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param request body dto.LoginDTO true "login"
+// @Success 200 {object} map[string]interface{}
+// @Failure 401 {object} map[string]interface{}
+// @Router /login [post]
 func Login(
 	c *fiber.Ctx,
 ) error {

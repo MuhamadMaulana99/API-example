@@ -24,23 +24,22 @@ func ConnectDB() {
 		os.Getenv("DB_PORT"),
 	)
 
-	db, err := gorm.Open(
-		postgres.Open(dsn),
-		&gorm.Config{},
-	)
+	database, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("failed to connect database:", err)
 	}
 
-	db.AutoMigrate(
+	DB = database
+
+	err = DB.AutoMigrate(
 		&domain.User{},
 		&domain.ActivityLog{},
 	)
 
-	DB = db
+	if err != nil {
+		log.Fatal("auto migrate failed:", err)
+	}
 
-	log.Println(
-		"database connected",
-	)
+	log.Println("database connected")
 }

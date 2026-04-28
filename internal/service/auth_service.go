@@ -45,6 +45,7 @@ func Register(
 		"POST",
 		"",
 		"User registered",
+		createdUser.ID, // targetID
 	)
 
 	return createdUser, nil
@@ -92,6 +93,7 @@ func DeleteUser(
 		"DELETE",
 		"",
 		"Deleted user",
+		targetID,
 	)
 
 	return nil
@@ -128,6 +130,7 @@ func Login(
 		"POST",
 		"",
 		"User Login",
+		user.ID, // targetID = user sendiri
 	)
 
 	token, err :=

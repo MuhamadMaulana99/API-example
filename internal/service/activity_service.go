@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"golang-api/internal/domain"
 	"golang-api/internal/repository"
 )
@@ -19,31 +20,29 @@ func UpdateUser(
 	name string,
 	email string,
 	actorID uint,
+	ip string,
 ) (domain.User, error) {
 
-	user, err :=
-		repository.UpdateUser(
-			id,
-			name,
-			email,
-		)
+	user, err := repository.UpdateUser(id, name, email)
 
 	if err != nil {
 		return user, err
 	}
 
-	// audit log
-	SaveActivity(
+	// 🔥 audit log
+	_ = SaveActivity(
 		actorID,
 		"UPDATE_USER",
-		"/api/users",
+		"/api/users/"+fmt.Sprint(id),
 		"PUT",
-		"",
+		ip,
 		"Updated user",
+		id,
 	)
 
 	return user, nil
 }
+
 func SaveActivity(
 	userID uint,
 	action string,
@@ -51,24 +50,18 @@ func SaveActivity(
 	method string,
 	ip string,
 	description string,
+	targetID uint,
 ) error {
 
 	activity := domain.ActivityLog{
-		UserID: userID,
-
-		Action: action,
-
-		Endpoint: endpoint,
-
-		Method: method,
-
-		IPAddress: ip,
-
+		UserID:      userID,
+		Action:      action,
+		Endpoint:    endpoint,
+		Method:      method,
+		IPAddress:   ip,
 		Description: description,
+		TargetID:    targetID,
 	}
 
-	return repository.
-		CreateActivityLog(
-			activity,
-		)
+	return repository.CreateActivityLog(activity)
 }

@@ -12,4 +12,6 @@ type ActivityLog struct {
 	Method      string
 	IPAddress   string
 	Description string
+
+	TargetID uint
 }

@@ -21,15 +21,25 @@ import (
 // @Router /register [post]
 func Register(c *fiber.Ctx) error {
 
-	req := c.Locals("body").(*dto.RegisterDTO)
+	var req dto.RegisterDTO
 
-	user, err := service.Register(*req)
-
-	if err != nil {
-		return utils.Error(c, 500, "failed create user", err.Error())
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(400).JSON(fiber.Map{
+			"message": "invalid body",
+		})
 	}
 
-	return utils.Success(c, 201, "created", user)
+	user, err := service.Register(req)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	return c.Status(201).JSON(fiber.Map{
+		"message": "created",
+		"data":    user,
+	})
 }
 
 // GetUsers godoc
@@ -91,8 +101,9 @@ func UpdateUser(c *fiber.Ctx) error {
 	id, _ := strconv.Atoi(c.Params("id"))
 
 	actorID := utils.GetUserIDFromToken(c)
+	ip := c.IP()
 
-	data, err := service.UpdateUser(uint(id), req.Name, req.Email, actorID)
+	data, err := service.UpdateUser(uint(id), req.Name, req.Email, actorID, ip)
 
 	if err != nil {
 		return utils.Error(c, 500, "update failed", err.Error())

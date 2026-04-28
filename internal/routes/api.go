@@ -15,6 +15,13 @@ func Setup(app *fiber.App) {
 
 	app.Get("/swagger/*", swagger.HandlerDefault)
 
+	api.Get(
+		"/activity-logs",
+		middleware.JWTProtected(),
+		middleware.AdminOnly(),
+		handler.GetActivityLogs,
+	)
+
 	api.Post(
 		"/register",
 		middleware.ValidateBody[dto.RegisterDTO](),

@@ -42,7 +42,22 @@ func UpdateUser(
 
 	return user, nil
 }
+func GetActivityLogs(
+	page int,
+	limit int,
+	search string,
+) (
+	[]domain.ActivityLog,
+	int64,
+	error,
+) {
 
+	return repository.GetActivityLogs(
+		page,
+		limit,
+		search,
+	)
+}
 func SaveActivity(
 	userID uint,
 	action string,

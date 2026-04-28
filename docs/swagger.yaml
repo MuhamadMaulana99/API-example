@@ -6,22 +6,37 @@ definitions:
         type: string
       password:
         type: string
+    required:
+    - email
+    - password
     type: object
   golang-api_internal_dto.RegisterDTO:
     properties:
       email:
         type: string
       name:
+        minLength: 3
         type: string
       password:
+        minLength: 8
         type: string
+      role:
+        type: string
+    required:
+    - email
+    - name
+    - password
     type: object
   golang-api_internal_dto.UpdateUserDTO:
     properties:
       email:
         type: string
       name:
+        minLength: 3
         type: string
+    required:
+    - email
+    - name
     type: object
 host: localhost:3000
 info:
@@ -30,6 +45,34 @@ info:
   title: User API
   version: "1.0"
 paths:
+  /activity-logs:
+    get:
+      parameters:
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Limit
+        in: query
+        name: limit
+        type: integer
+      - description: Actor name
+        in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get activity logs
+      tags:
+      - Audit
   /login:
     post:
       consumes:
